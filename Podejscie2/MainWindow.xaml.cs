@@ -279,6 +279,12 @@ namespace Podejscie2
         {
             ScaleX -= 0.5;
             ScaleY -= 0.5;
+            if (ScaleX <=0)
+                ScaleX = .1;
+
+            if (ScaleY <=0)
+                ScaleY = .1;
+
             MyStackPanel1.LayoutTransform = new ScaleTransform(ScaleX, ScaleY);
         }
 
