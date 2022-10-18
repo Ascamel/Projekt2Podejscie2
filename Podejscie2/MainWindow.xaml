@@ -1,4 +1,4 @@
-﻿<Window x:Class="Podejscie2.MainWindow"
+﻿<Window x:Name="MainWindow1" x:Class="Podejscie2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,15 +10,29 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"></ColumnDefinition>
             <ColumnDefinition Width="8*"></ColumnDefinition>
+            
         </Grid.ColumnDefinitions>
 
-        <Button x:Name="LoadButton" Grid.Column="0" Margin="20,100" Click="LoadButton_Click">Load</Button>
+        <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible" Grid.Column="1">
+            <StackPanel x:Name="MyStackPanel1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Image x:Name="MyImage" MouseLeftButtonDown="ZoomInButtonClick" MouseRightButtonDown="ZoomOutButtonClick" RenderOptions.BitmapScalingMode="NearestNeighbor" HorizontalAlignment="Left" VerticalAlignment="Top" MouseMove="ImageMouseMove">
+                </Image>
+            </StackPanel>
+        </ScrollViewer>
 
-        <Image x:Name="MyImage" Grid.Column="1" MouseLeftButtonDown="ZoomInButtonClick" MouseRightButtonDown="ZoomOutButtonClick" RenderOptions.BitmapScalingMode="NearestNeighbor">
-            <Image.RenderTransform>
-                <ScaleTransform/>
-            </Image.RenderTransform>
-        </Image>
+        <StackPanel x:Name="MyStackPanel" Grid.Row="1" VerticalAlignment="Center">
+            <Button x:Name="LoadButton"  Click="LoadButton_Click">Load PPM</Button>
+            <Button Click="LoadJpeg_Click">Load JPEG</Button>
+            <Button Click="SaveJpeg_Click">Save JPEG</Button>
+            <Label HorizontalAlignment="Center" Foreground="White">Compression</Label>
+            <Slider Name="Compression" Orientation="Horizontal" Minimum="1" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" />
+
+            <TextBlock x:Name="ValueBlock" Foreground="White" TextWrapping="Wrap"></TextBlock>
+            
+        </StackPanel>
+        
+
+        
 
     </Grid>
 </Window>

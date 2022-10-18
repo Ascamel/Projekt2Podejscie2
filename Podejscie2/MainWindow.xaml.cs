@@ -18,7 +18,10 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Media3D;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Formats.Asn1.AsnWriter;
+using static System.Net.Mime.MediaTypeNames;
 using Color = System.Drawing.Color;
+using Point = System.Windows.Point;
 
 namespace Podejscie2
 {
@@ -215,17 +218,12 @@ namespace Podejscie2
                                 {
                                     ColourSize = Convert.ToInt32(stringBuilder.ToString());
                                     stringBuilder = new();
-                                    Trace.WriteLine(reader.ReadByte());
+                                    reader.ReadByte();
                                     for (int i = 0; i < HeightSize; i++)
                                     {
                                         for (int j = 0; j < WidthSize; j++)
                                         {
-                                            
-                                            
-
-                                            int red = Convert.ToInt32(reader.ReadByte());// reader.ReadByte() * 255 / ColourSize
-
-
+                                            int red = Convert.ToInt32(reader.ReadByte());
 
                                             int green = Convert.ToInt32(reader.ReadByte());
 
@@ -264,18 +262,95 @@ namespace Podejscie2
                 return bitmapImage;
             }
         }
+        double ScaleX = 1.1;
+        double ScaleY = 1.1;
         private void ZoomInButtonClick(object sender, MouseButtonEventArgs e)
         {
-            var transform = (ScaleTransform)MyImage.RenderTransform;
-            transform.ScaleX *= 1.5;
-            transform.ScaleY *= 1.5;
+             ScaleX += 0.5;
+             ScaleY += 0.5;
+             MyStackPanel1.LayoutTransform = new ScaleTransform(ScaleX, ScaleY);
         }
 
         private void ZoomOutButtonClick(object sender, MouseButtonEventArgs e)
         {
-            var transform = (ScaleTransform)MyImage.RenderTransform;
-            transform.ScaleX /= 1.1;
-            transform.ScaleY /= 1.1;
+            ScaleX -= 0.5;
+            ScaleY -= 0.5;
+            MyStackPanel1.LayoutTransform = new ScaleTransform(ScaleX, ScaleY);
+        }
+
+        private void LoadJpeg_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new()
+            {
+                Filter = "JPEG File | *.jpg"
+            };
+
+            bool? result = dialog.ShowDialog();
+
+            if (result is not true) return;
+            string fileName = dialog.FileName;
+
+            ImageSource imageSource = new BitmapImage(new Uri(fileName));
+            MyImage.Source = imageSource;
+        }
+
+        private void SaveJpeg_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog fileDialog = new()
+            {
+                Filter = "JPEG File | *.jpg"
+            };
+
+            bool? result = fileDialog.ShowDialog();
+
+            if (result is not true)
+                return;
+
+            var fileName = fileDialog.FileName;
+
+            const double dpi = 96d;
+            var bounds = VisualTreeHelper.GetDescendantBounds(MyImage);
+            //Trace.WriteLine(MainWindow1.Width);
+            
+
+            RenderTargetBitmap bitmap = new(
+                (int)bounds.Width,
+                (int)bounds.Height,
+                dpi,
+                dpi,
+                PixelFormats.Default);
+
+            bitmap.Render(MyImage);
+
+            JpegBitmapEncoder encoder = new();
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            encoder.QualityLevel = int.Parse(Compression.Value.ToString());
+
+            using var fileStream = File.Create(fileName);
+            encoder.Save(fileStream);
+        }
+
+        private void ImageMouseMove(object sender, MouseEventArgs e)
+        {
+            Point point = Mouse.GetPosition(MyImage);
+
+            var renderTargetBitmap = new RenderTargetBitmap((int)MyImage.ActualWidth,
+                (int)MyImage.ActualHeight,
+                96, 96, PixelFormats.Default);
+            renderTargetBitmap.Render(MyImage);
+
+            if ((point.X <= renderTargetBitmap.PixelWidth) && (point.Y <= renderTargetBitmap.PixelHeight))
+            {
+                CroppedBitmap croppedBitmap;
+                if ((int)point.X >1 && (int)point.Y >1)
+                {
+                    croppedBitmap = new CroppedBitmap(renderTargetBitmap,
+                    new Int32Rect((int)point.X, (int)point.Y, 1, 1));
+                    var pixels = new byte[4];
+                    croppedBitmap.CopyPixels(pixels, 4, 0);
+                    ValueBlock.Text = "Red Value: " + pixels[2] + "\tGreen Value: " + pixels[1] + " \tBlue Value: " + pixels[0];
+                }
+            }
         }
     }
 }
