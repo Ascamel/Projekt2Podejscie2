@@ -229,7 +229,11 @@ namespace Podejscie2
 
                                             int blue = Convert.ToInt32(reader.ReadByte());
 
-                                            bitmap.SetPixel(j, i, Color.FromArgb(red, green, blue));
+                                            if (ColourSize == 255)
+                                                bitmap.SetPixel(j, i, Color.FromArgb(red, green, blue));
+                                            else
+                                                bitmap.SetPixel(j, i, Color.FromArgb(red>>8, G>>green, B >> blue));
+                                           // bitmap.SetPixel(j, i, Color.FromArgb(red, green, blue));
                                         }
                                     }
                                 }
